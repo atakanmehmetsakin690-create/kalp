@@ -1,0 +1,354 @@
+```html
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Seni Seviyorum ❤️</title>
+
+<style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.message {
+    position: fixed;
+
+    /* Yazıyı kalbin altına aldık */
+    top: calc(50% + 260px);
+
+    left: 0;
+    width: 100%;
+
+    text-align: center;
+
+    color: #00aaff;
+
+text-shadow:
+    0 0 5px #00aaff,
+    0 0 15px #008cff,
+    0 0 30px #00c8ff,
+    0 0 50px #008cff;
+
+    animation: yazipulse 1.5s infinite;
+
+    z-index: 5;
+}
+
+@keyframes yazipulse {
+
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.06);
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="message">
+    Seni Seviyorum Sevgilim ❤️
+</div>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let width;
+let height;
+
+function resize() {
+
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+
+}
+
+resize();
+
+window.addEventListener("resize", resize);
+
+
+// Python kodundaki renkler
+const colors = [
+    "#008cff",
+    "#00aaff",
+    "#00c8ff",
+    "#0080ff"
+];
+
+
+// Python'daki:
+//
+// for i in range(120)
+//
+// kısmı
+const totalLines = 120;
+
+
+// Animasyon için
+let currentLine = 0;
+
+
+// Kalbin oluşturulacağı çizgiler
+const heartLines = [];
+
+
+// Python:
+//
+// angle = i * (math.pi * 2) / 120
+//
+// ile aynı mantık
+for (let i = 0; i < totalLines; i++) {
+
+    const angle =
+        i * (Math.PI * 2) / totalLines;
+
+
+    // Python:
+    //
+    // x = 16 * (sin(angle) ** 3) * 12
+    //
+    const x =
+        16 *
+        Math.pow(Math.sin(angle), 3) *
+        12;
+
+
+    // Python:
+    //
+    // y = (
+    // 13*cos(angle)
+    // -5*cos(2*angle)
+    // -2*cos(3*angle)
+    // -cos(4*angle)
+    // ) * 12
+    //
+    const y =
+        (
+            13 * Math.cos(angle)
+            - 5 * Math.cos(2 * angle)
+            - 2 * Math.cos(3 * angle)
+            - Math.cos(4 * angle)
+        ) * 12;
+
+
+    heartLines.push({
+        x: x,
+        y: y,
+        color:
+            colors[
+                Math.floor(
+                    Math.random() * colors.length
+                )
+            ]
+    });
+
+}
+
+
+// Kalbin ölçeği
+function getScale() {
+
+    return Math.min(width, height) / 650;
+
+}
+
+
+// Kalbin merkezi
+function getCenter() {
+
+    return {
+        x: width / 2,
+        y: height / 2 - 90
+    };
+
+}
+
+
+// Bir çizginin ucundaki
+// Python'daki küçük yıldız efektini çiz
+function drawStar(x, y, color, rotation) {
+
+    ctx.save();
+
+    ctx.translate(x, y);
+
+    ctx.rotate(rotation);
+
+    ctx.strokeStyle = color;
+
+    ctx.lineWidth = 1;
+
+    ctx.shadowBlur = 8;
+
+    ctx.shadowColor = color;
+
+
+    // Python'daki:
+    //
+    // for _ in range(8):
+    //     t.forward(5)
+    //     t.backward(5)
+    //     t.right(45)
+    //
+    // karşılığı
+    for (let j = 0; j < 8; j++) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(0, 0);
+
+        ctx.lineTo(7, 0);
+
+        ctx.stroke();
+
+        ctx.rotate(Math.PI / 4);
+
+    }
+
+    ctx.restore();
+
+}
+
+
+// Animasyon
+function animate() {
+
+    // Siyah ekranı temizle
+    ctx.fillStyle = "black";
+
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    const center = getCenter();
+
+    const scale = getScale();
+
+
+    // Şu ana kadar çizilecek çizgi sayısı
+    const amount =
+        Math.floor(currentLine);
+
+
+    for (let i = 0; i < amount; i++) {
+
+        const line = heartLines[i];
+
+
+        // Merkezden kalp noktasına
+        // giden çizgi
+        const endX =
+            center.x + line.x * scale;
+
+        const endY =
+            center.y - line.y * scale;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            center.x,
+            center.y
+        );
+
+        ctx.lineTo(
+            endX,
+            endY
+        );
+
+
+        ctx.strokeStyle = line.color;
+
+        ctx.lineWidth = 1;
+
+
+        // Neon efekti
+        ctx.shadowBlur = 7;
+
+        ctx.shadowColor =
+            line.color;
+
+
+        ctx.stroke();
+
+
+        // Çizginin ucundaki
+        // küçük yıldız
+        drawStar(
+            endX,
+            endY,
+            line.color,
+            i * 0.1
+        );
+
+    }
+
+
+    ctx.shadowBlur = 0;
+
+
+    // Yavaşça çiz
+    if (currentLine < totalLines) {
+
+        currentLine += 0.35;
+
+    } else {
+
+        // Kalp tamamlandıktan sonra
+        // biraz bekle
+
+        setTimeout(() => {
+
+            currentLine = 0;
+
+        }, 1200);
+
+    }
+
+
+    requestAnimationFrame(animate);
+
+}
+
+
+animate();
+
+</script>
+
+</body>
+</html>
+```
